@@ -1,0 +1,3 @@
+[alias]
+build-cli = "build --bin rswidevine --features cli"
+run-cli = "run --bin rswidevine --features cli"

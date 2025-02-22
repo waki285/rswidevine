@@ -1,0 +1,6 @@
+{
+  "rust-analyzer.cargo.features": "all",
+  "[proto]": {
+    "editor.tabSize": 2
+  }
+}

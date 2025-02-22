@@ -4,3 +4,30 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.93"
+chrono = { version = "0.4", optional = true }
+clap = { version = "4.5", features = ["derive"], optional = true }
+env_logger = { version = "0.11", optional = true }
+log = { version = "0.4", optional = true, features = ["std"] }
+prost = "0.13"
+prost-types = "0.13"
+uuid = { version = "1.11", default-features = false, features = ["fast-rng", "std", "v4"] }
+
+[[bin]]
+name = "rswidevine"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[lib]
+name = "rswidevine"
+path = "src/lib.rs"
+
+[features]
+default = ["log"]
+
+cli = ["dep:clap", "dep:env_logger", "log"]
+chrono = ["dep:chrono"]
+log = ["dep:log"]
+
+[build-dependencies]
+prost-build = "0.13"
