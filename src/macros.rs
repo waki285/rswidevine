@@ -32,10 +32,10 @@ macro_rules! error {
 
 macro_rules! log {
     ($level: ident, $($t:tt)*) => {
-        #[cfg(feature = "log")]
-        { log::$level!($($t)*) }
+        #[cfg(feature = "tracing")]
+        { tracing::$level!($($t)*) }
         // Silence unused variables warnings.
-        #[cfg(not(feature = "log"))]
+        #[cfg(not(feature = "tracing"))]
         { if false { let _ = ( $($t)* ); } }
     }
 }

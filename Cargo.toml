@@ -2,16 +2,48 @@
 name = "rswidevine"
 version = "0.1.0"
 edition = "2021"
+description = "Widevine CDM (Content Decryption Module) implementation in Rust."
+license = "GPL-3.0-only"
+repository = "https://github.com/waki285/rswidevine"
+homepage = "https://github.com/waki285/rswidevine"
+keywords = ["widevine", "drm", "cdm", "cenc"]
+categories = ["multimedia::video", "cryptography"]
 
 [dependencies]
-anyhow = "1.0.93"
+anyhow = "1"
+thiserror = "2"
 chrono = { version = "0.4", optional = true }
-clap = { version = "4.5", features = ["derive"], optional = true }
-env_logger = { version = "0.11", optional = true }
-log = { version = "0.4", optional = true, features = ["std"] }
-prost = "0.13"
-prost-types = "0.13"
-uuid = { version = "1.11", default-features = false, features = ["fast-rng", "std", "v4"] }
+clap = { version = "4", features = ["derive"], optional = true }
+prost = "0.14"
+prost-types = "0.14"
+uuid = { version = "1", default-features = false, features = ["fast-rng", "std", "v4"] }
+hex = "0.4"
+
+# Cryptography
+rsa = { version = "0.9", features = ["sha1", "sha2", "pem"] }
+aes = "0.8"
+cbc = { version = "0.1", features = ["alloc"] }
+cmac = "0.7"
+hmac = "0.12"
+sha1 = "0.10"
+sha2 = "0.10"
+
+# Serialization
+base64 = "0.22"
+byteorder = "1"
+
+# Optional functionality
+serde = { version = "1", features = ["derive"], optional = true }
+serde_json = { version = "1", optional = true }
+serde_yaml = { version = "0.9.34", optional = true }
+reqwest = { version = "0.13", features = ["json", "blocking", "rustls"], optional = true }
+axum = { version = "0.8", optional = true }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"], optional = true }
+crc32fast = { version = "1", optional = true }
+deunicode = { version = "1", optional = true }
+roxmltree = { version = "0.21", optional = true }
+tracing = { version = "0.1", optional = true }
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"], optional = true }
 
 [[bin]]
 name = "rswidevine"
@@ -23,11 +55,25 @@ name = "rswidevine"
 path = "src/lib.rs"
 
 [features]
-default = ["log"]
+default = ["cli", "tracing"]
 
-cli = ["dep:clap", "dep:env_logger", "log"]
+cli = [
+    "dep:clap",
+    "dep:crc32fast",
+    "dep:deunicode",
+    "dep:reqwest",
+    "dep:serde",
+    "dep:serde_json",
+    "dep:serde_yaml",
+    "dep:tracing",
+    "dep:tracing-subscriber",
+]
 chrono = ["dep:chrono"]
-log = ["dep:log"]
+full = ["cli", "chrono", "playready", "remote", "serve", "tracing"]
+tracing = ["dep:tracing", "dep:tracing-subscriber"]
+playready = ["dep:roxmltree"]
+remote = ["dep:reqwest", "dep:serde", "dep:serde_json"]
+serve = ["dep:axum", "dep:tokio", "dep:serde", "dep:serde_json"]
 
 [build-dependencies]
-prost-build = "0.13"
+prost-build = "0.14"
