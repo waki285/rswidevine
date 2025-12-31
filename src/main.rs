@@ -26,7 +26,12 @@ use rsa::traits::PublicKeyParts;
 use tracing::{error, info, warn, Level};
 
 #[derive(Parser)]
-#[command(name = "rswidevine", version, disable_version_flag = true, about = "rswidevine CLI")]
+#[command(
+    name = "rswidevine",
+    version,
+    disable_version_flag = true,
+    about = "rswidevine CLI"
+)]
 struct Cli {
     #[arg(short = 'v', long = "version", action = ArgAction::SetTrue)]
     version: bool,
@@ -85,9 +90,7 @@ enum Commands {
         out_dir: Option<PathBuf>,
     },
     /// Migrate older WVD files to the latest v2 format.
-    Migrate {
-        path: PathBuf,
-    },
+    Migrate { path: PathBuf },
     #[cfg(feature = "serve")]
     /// Serve local devices and CDM sessions over HTTP.
     Serve {
@@ -102,15 +105,9 @@ enum Commands {
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
-    let level = if cli.debug {
-        Level::DEBUG
-    } else {
-        Level::INFO
-    };
+    let level = if cli.debug { Level::DEBUG } else { Level::INFO };
 
-    tracing_subscriber::fmt()
-        .with_max_level(level)
-        .init();
+    tracing_subscriber::fmt().with_max_level(level).init();
 
     let current_year = current_year();
     let copyright_years = format!("2024-{}", current_year);
@@ -118,8 +115,7 @@ fn main() -> anyhow::Result<()> {
 
     info!(
         "rswidevine version {} Copyright (c) {} waki285 (Original: rlaphoenix)",
-        version,
-        copyright_years
+        version, copyright_years
     );
     info!("https://github.com/waki285/rswidevine");
 
@@ -143,7 +139,14 @@ fn main() -> anyhow::Result<()> {
             client_id,
             vmp,
             output,
-        }) => run_create_device(&type_, level, &key, &client_id, vmp.as_deref(), output.as_deref()),
+        }) => run_create_device(
+            &type_,
+            level,
+            &key,
+            &client_id,
+            vmp.as_deref(),
+            output.as_deref(),
+        ),
         Some(Commands::ExportDevice { wvd_path, out_dir }) => {
             run_export_device(&wvd_path, out_dir.as_deref())
         }
@@ -180,7 +183,10 @@ fn run_license(
     privacy: bool,
 ) -> anyhow::Result<()> {
     let device = Device::from_path(device_path).context("Failed to load device")?;
-    info!("[+] Loaded Device ({} L{})", device.system_id, device.security_level);
+    info!(
+        "[+] Loaded Device ({} L{})",
+        device.system_id, device.security_level
+    );
 
     let mut cdm = Cdm::from_device(device)?;
     info!("[+] Loaded CDM");
@@ -236,7 +242,12 @@ fn run_license(
     info!("[+] License Parsed Successfully");
 
     for key in cdm.get_keys(&session_id, None)? {
-        info!("[{}] {}:{}", key.key_type, key.kid.as_simple(), hex::encode(key.key));
+        info!(
+            "[{}] {}:{}",
+            key.key_type,
+            key.kid.as_simple(),
+            hex::encode(key.key)
+        );
     }
 
     cdm.close(&session_id)?;
@@ -277,8 +288,14 @@ fn run_create_device(
     let wvd_bin = device.to_bytes()?;
 
     let client_info = client_info_map(&device.client_id);
-    let company = client_info.get("company_name").cloned().unwrap_or_else(|| "widevine".to_string());
-    let model = client_info.get("model_name").cloned().unwrap_or_else(|| "device".to_string());
+    let company = client_info
+        .get("company_name")
+        .cloned()
+        .unwrap_or_else(|| "widevine".to_string());
+    let model = client_info
+        .get("model_name")
+        .cloned()
+        .unwrap_or_else(|| "device".to_string());
     let mut name = format!("{} {}", company, model);
     if let Some(version) = client_info.get("widevine_cdm_version") {
         name.push(' ');
@@ -319,7 +336,10 @@ fn run_create_device(
     }
     std::fs::write(&out_path, wvd_bin)?;
 
-    info!("Created Widevine Device (.wvd) file, {}", out_path.file_name().unwrap().to_string_lossy());
+    info!(
+        "Created Widevine Device (.wvd) file, {}",
+        out_path.file_name().unwrap().to_string_lossy()
+    );
     info!(" + Type: {:?}", device.device_type);
     info!(" + System ID: {}", device.system_id);
     info!(" + Security Level: {}", device.security_level);
@@ -375,7 +395,10 @@ fn run_export_device(wvd_path: &Path, out_dir: Option<&Path>) -> anyhow::Result<
     let private_key_path = out_path.join("private_key.pem");
     let private_key_pem = device.private_key.to_pkcs1_pem(Default::default())?;
     std::fs::write(&private_key_path, private_key_pem.as_bytes())?;
-    std::fs::write(out_path.join("private_key.der"), device.private_key.to_pkcs1_der()?.as_bytes())?;
+    std::fs::write(
+        out_path.join("private_key.der"),
+        device.private_key.to_pkcs1_der()?.as_bytes(),
+    )?;
     info!("Exported Private Key as private_key.der and private_key.pem");
 
     let client_id_path = out_path.join("client_id.bin");
@@ -515,8 +538,14 @@ fn client_info_map(client_id: &ClientIdentification) -> HashMap<String, String> 
 
 fn client_capabilities_to_value(cap: &ClientCapabilities) -> serde_json::Value {
     let mut map = serde_json::Map::new();
-    map.insert("client_token".to_string(), serde_json::Value::Bool(cap.client_token.unwrap_or(false)));
-    map.insert("session_token".to_string(), serde_json::Value::Bool(cap.session_token.unwrap_or(false)));
+    map.insert(
+        "client_token".to_string(),
+        serde_json::Value::Bool(cap.client_token.unwrap_or(false)),
+    );
+    map.insert(
+        "session_token".to_string(),
+        serde_json::Value::Bool(cap.session_token.unwrap_or(false)),
+    );
     map.insert(
         "video_resolution_constraints".to_string(),
         serde_json::Value::Bool(cap.video_resolution_constraints.unwrap_or(false)),
@@ -529,14 +558,20 @@ fn client_capabilities_to_value(cap: &ClientCapabilities) -> serde_json::Value {
             .unwrap_or_else(|| serde_json::Value::String("HDCP_NONE".to_string())),
     );
     if let Some(v) = cap.oem_crypto_api_version {
-        map.insert("oem_crypto_api_version".to_string(), serde_json::Value::Number(v.into()));
+        map.insert(
+            "oem_crypto_api_version".to_string(),
+            serde_json::Value::Number(v.into()),
+        );
     }
     map.insert(
         "anti_rollback_usage_table".to_string(),
         serde_json::Value::Bool(cap.anti_rollback_usage_table.unwrap_or(false)),
     );
     if let Some(v) = cap.srm_version {
-        map.insert("srm_version".to_string(), serde_json::Value::Number(v.into()));
+        map.insert(
+            "srm_version".to_string(),
+            serde_json::Value::Number(v.into()),
+        );
     }
     map.insert(
         "can_update_srm".to_string(),
@@ -564,7 +599,10 @@ fn client_capabilities_to_value(cap: &ClientCapabilities) -> serde_json::Value {
         serde_json::Value::Bool(cap.can_disable_analog_output.unwrap_or(false)),
     );
     if let Some(v) = cap.resource_rating_tier {
-        map.insert("resource_rating_tier".to_string(), serde_json::Value::Number(v.into()));
+        map.insert(
+            "resource_rating_tier".to_string(),
+            serde_json::Value::Number(v.into()),
+        );
     }
     serde_json::Value::Object(map)
 }

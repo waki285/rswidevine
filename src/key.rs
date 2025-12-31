@@ -47,10 +47,18 @@ impl Key {
         // Extract permissions for OPERATOR_SESSION keys
         if container.r#type() == KeyType::OperatorSession {
             if let Some(ref perms) = container.operator_session_key_permissions {
-                if perms.allow_encrypt.unwrap_or(false) { permissions.push("allow_encrypt".to_string()); }
-                if perms.allow_decrypt.unwrap_or(false) { permissions.push("allow_decrypt".to_string()); }
-                if perms.allow_sign.unwrap_or(false) { permissions.push("allow_sign".to_string()); }
-                if perms.allow_signature_verify.unwrap_or(false) { permissions.push("allow_signature_verify".to_string()); }
+                if perms.allow_encrypt.unwrap_or(false) {
+                    permissions.push("allow_encrypt".to_string());
+                }
+                if perms.allow_decrypt.unwrap_or(false) {
+                    permissions.push("allow_decrypt".to_string());
+                }
+                if perms.allow_sign.unwrap_or(false) {
+                    permissions.push("allow_sign".to_string());
+                }
+                if perms.allow_signature_verify.unwrap_or(false) {
+                    permissions.push("allow_signature_verify".to_string());
+                }
             }
         }
 

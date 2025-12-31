@@ -11,13 +11,13 @@ use base64::Engine;
 use cbc::cipher::{block_padding::Pkcs7, BlockEncryptMut, KeyIvInit};
 use cmac::Cmac;
 use hmac::{Hmac, Mac};
-use std::sync::LazyLock;
 use prost::Message;
-use rsa::rand_core::{OsRng, RngCore};
 use rsa::pkcs1::DecodeRsaPublicKey;
+use rsa::rand_core::{OsRng, RngCore};
 use rsa::{Oaep, Pss, RsaPrivateKey, RsaPublicKey};
 use sha1::{Digest as Sha1Digest, Sha1};
 use sha2::Sha256;
+use std::sync::LazyLock;
 use uuid::Uuid;
 
 use crate::device::{Device, DeviceType};
@@ -121,8 +121,7 @@ static ROOT_PUBLIC_KEY: LazyLock<RsaPublicKey> = LazyLock::new(|| {
         .public_key
         .as_ref()
         .expect("Missing root public key");
-    RsaPublicKey::from_pkcs1_der(public_key_bytes.as_slice())
-        .expect("Invalid root public key")
+    RsaPublicKey::from_pkcs1_der(public_key_bytes.as_slice()).expect("Invalid root public key")
 });
 
 /// Widevine Content Decryption Module (CDM).
@@ -221,8 +220,9 @@ impl Cdm {
                     .drm_certificate
                     .as_ref()
                     .ok_or_else(|| Error::DecodeError("Missing DRM certificate".to_string()))?;
-                let drm_cert = DrmCertificate::decode(cert_bytes.as_slice())
-                    .map_err(|e| Error::DecodeError(format!("Failed to parse DrmCertificate: {}", e)))?;
+                let drm_cert = DrmCertificate::decode(cert_bytes.as_slice()).map_err(|e| {
+                    Error::DecodeError(format!("Failed to parse DrmCertificate: {}", e))
+                })?;
                 drm_cert.provider_id.clone()
             } else {
                 None
@@ -283,7 +283,7 @@ impl Cdm {
             .ok_or_else(|| Error::InvalidLicenseType(license_type.to_string()))?;
 
         let request_id = if self.device_type == DeviceType::Android {
-            let mut req = vec![0u8; 16];
+            let mut req = [0u8; 16];
             let mut rng = OsRng;
             rng.fill_bytes(&mut req[..4]);
             // bytes 4..8 remain 0
@@ -303,10 +303,7 @@ impl Cdm {
         let encrypted_client_id = if session.service_certificate.is_some() && privacy_mode {
             Some(Self::encrypt_client_id(
                 &self.client_id,
-                session
-                    .service_certificate
-                    .as_ref()
-                    .expect("checked above"),
+                session.service_certificate.as_ref().expect("checked above"),
                 None,
                 None,
             )?)
@@ -350,7 +347,9 @@ impl Cdm {
         let signature = sign_pss_sha1(&self.private_key, &license_request_bytes)?;
 
         let signed_message = SignedMessage {
-            r#type: Some(crate::license_protocol::signed_message::MessageType::LicenseRequest as i32),
+            r#type: Some(
+                crate::license_protocol::signed_message::MessageType::LicenseRequest as i32,
+            ),
             msg: Some(license_request_bytes.clone()),
             signature: Some(signature),
             session_key: None,
@@ -380,8 +379,9 @@ impl Cdm {
             .get_mut(session_id)
             .ok_or_else(|| Error::InvalidSession(session_id.to_vec()))?;
 
-        let signed_message = SignedMessage::decode(license_message)
-            .map_err(|e| Error::InvalidLicenseMessage(format!("Failed to parse SignedMessage: {}", e)))?;
+        let signed_message = SignedMessage::decode(license_message).map_err(|e| {
+            Error::InvalidLicenseMessage(format!("Failed to parse SignedMessage: {}", e))
+        })?;
 
         if signed_message.r#type
             != Some(crate::license_protocol::signed_message::MessageType::License as i32)
@@ -419,7 +419,7 @@ impl Cdm {
         let decrypted_session_key = self
             .private_key
             .decrypt(Oaep::new::<Sha1>(), session_key)
-            .map_err(|e| Error::RsaError(e))?;
+            .map_err(Error::RsaError)?;
 
         let (enc_key, mac_key_server, _) =
             Self::derive_keys(&context.0, &context.1, &decrypted_session_key);
@@ -475,11 +475,11 @@ impl Cdm {
         Ok(session
             .keys
             .iter()
-            .cloned()
-            .filter(|k| match &filter {
+            .filter(|&k| match &filter {
                 Some(f) => &k.key_type == f,
                 None => true,
             })
+            .cloned()
             .collect())
     }
 
@@ -675,10 +675,13 @@ impl Cdm {
     ///
     /// Returns (enc_key, mac_key_server, mac_key_client) using AES-CMAC over
     /// the context data.
-    pub fn derive_keys(enc_context: &[u8], mac_context: &[u8], key: &[u8]) -> (Vec<u8>, Vec<u8>, Vec<u8>) {
+    pub fn derive_keys(
+        enc_context: &[u8],
+        mac_context: &[u8],
+        key: &[u8],
+    ) -> (Vec<u8>, Vec<u8>, Vec<u8>) {
         fn derive(session_key: &[u8], context: &[u8], counter: u8) -> Vec<u8> {
-            let mut mac =
-                CmacAes128::new_from_slice(session_key).expect("CMAC key length invalid");
+            let mut mac = CmacAes128::new_from_slice(session_key).expect("CMAC key length invalid");
             mac.update(&[counter]);
             mac.update(context);
             mac.finalize().into_bytes().to_vec()
@@ -741,15 +744,18 @@ fn decode_signed_drm_certificate(data: &[u8]) -> Result<SignedDrmCertificate> {
     let signed_message = SignedMessage::decode(data);
     if let Ok(signed_message) = signed_message {
         let signed_message_bytes = signed_message.encode_to_vec();
-        if signed_message_bytes.len() > 0
-            && data.len() % signed_message_bytes.len() == 0
-            && data.chunks(signed_message_bytes.len()).all(|c| c == signed_message_bytes)
+        if !signed_message_bytes.is_empty()
+            && data.len().is_multiple_of(signed_message_bytes.len())
+            && data
+                .chunks(signed_message_bytes.len())
+                .all(|c| c == signed_message_bytes)
         {
             let msg_bytes = signed_message
                 .msg
                 .ok_or_else(|| Error::DecodeError("SignedMessage missing msg".to_string()))?;
-            return SignedDrmCertificate::decode(msg_bytes.as_slice())
-                .map_err(|e| Error::DecodeError(format!("Failed to parse SignedDrmCertificate: {}", e)));
+            return SignedDrmCertificate::decode(msg_bytes.as_slice()).map_err(|e| {
+                Error::DecodeError(format!("Failed to parse SignedDrmCertificate: {}", e))
+            });
         }
     }
 

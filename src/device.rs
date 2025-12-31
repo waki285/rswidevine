@@ -14,7 +14,9 @@ use rsa::pkcs8::DecodePrivateKey;
 use rsa::RsaPrivateKey;
 
 use crate::error::{Error, Result};
-use crate::license_protocol::{ClientIdentification, DrmCertificate, FileHashes, SignedDrmCertificate};
+use crate::license_protocol::{
+    ClientIdentification, DrmCertificate, FileHashes, SignedDrmCertificate,
+};
 
 /// Magic bytes for WVD files.
 const WVD_MAGIC: &[u8; 3] = b"WVD";
@@ -103,8 +105,9 @@ impl Device {
             .as_ref()
             .ok_or_else(|| Error::InvalidWvdFile("Client ID token missing".to_string()))?;
 
-        let signed_drm_cert = SignedDrmCertificate::decode(token.as_slice())
-            .map_err(|e| Error::DecodeError(format!("Failed to parse SignedDrmCertificate: {}", e)))?;
+        let signed_drm_cert = SignedDrmCertificate::decode(token.as_slice()).map_err(|e| {
+            Error::DecodeError(format!("Failed to parse SignedDrmCertificate: {}", e))
+        })?;
 
         let drm_cert_bytes = signed_drm_cert
             .drm_certificate
@@ -145,7 +148,6 @@ impl Device {
     pub fn from_bytes(data: &[u8]) -> Result<Self> {
         Self::parse_v2(data)
     }
-
 
     /// Parse a v2 WVD file.
     ///
@@ -188,14 +190,18 @@ impl Device {
 
         // Private key length (2 bytes, big endian)
         if offset + 2 > data.len() {
-            return Err(Error::InvalidWvdFile("Data too short for private key length".to_string()));
+            return Err(Error::InvalidWvdFile(
+                "Data too short for private key length".to_string(),
+            ));
         }
         let private_key_len = u16::from_be_bytes([data[offset], data[offset + 1]]) as usize;
         offset += 2;
 
         // Private key
         if offset + private_key_len > data.len() {
-            return Err(Error::InvalidWvdFile("Data too short for private key".to_string()));
+            return Err(Error::InvalidWvdFile(
+                "Data too short for private key".to_string(),
+            ));
         }
         let private_key_der = &data[offset..offset + private_key_len];
         offset += private_key_len;
@@ -206,19 +212,24 @@ impl Device {
 
         // Client ID length (2 bytes, big endian)
         if offset + 2 > data.len() {
-            return Err(Error::InvalidWvdFile("Data too short for client ID length".to_string()));
+            return Err(Error::InvalidWvdFile(
+                "Data too short for client ID length".to_string(),
+            ));
         }
         let client_id_len = u16::from_be_bytes([data[offset], data[offset + 1]]) as usize;
         offset += 2;
 
         // Client ID
         if offset + client_id_len > data.len() {
-            return Err(Error::InvalidWvdFile("Data too short for client ID".to_string()));
+            return Err(Error::InvalidWvdFile(
+                "Data too short for client ID".to_string(),
+            ));
         }
         let client_id_bytes = &data[offset..offset + client_id_len];
 
-        let client_id = ClientIdentification::decode(client_id_bytes)
-            .map_err(|e| Error::DecodeError(format!("Failed to parse ClientIdentification: {}", e)))?;
+        let client_id = ClientIdentification::decode(client_id_bytes).map_err(|e| {
+            Error::DecodeError(format!("Failed to parse ClientIdentification: {}", e))
+        })?;
 
         Self::new(device_type, security_level, flags, private_key, client_id)
     }
@@ -253,14 +264,18 @@ impl Device {
 
         // Private key length (2 bytes, big endian)
         if offset + 2 > data.len() {
-            return Err(Error::InvalidWvdFile("Data too short for private key length".to_string()));
+            return Err(Error::InvalidWvdFile(
+                "Data too short for private key length".to_string(),
+            ));
         }
         let private_key_len = u16::from_be_bytes([data[offset], data[offset + 1]]) as usize;
         offset += 2;
 
         // Private key
         if offset + private_key_len > data.len() {
-            return Err(Error::InvalidWvdFile("Data too short for private key".to_string()));
+            return Err(Error::InvalidWvdFile(
+                "Data too short for private key".to_string(),
+            ));
         }
         let private_key_der = &data[offset..offset + private_key_len];
         offset += private_key_len;
@@ -271,33 +286,40 @@ impl Device {
 
         // Client ID length (2 bytes, big endian)
         if offset + 2 > data.len() {
-            return Err(Error::InvalidWvdFile("Data too short for client ID length".to_string()));
+            return Err(Error::InvalidWvdFile(
+                "Data too short for client ID length".to_string(),
+            ));
         }
         let client_id_len = u16::from_be_bytes([data[offset], data[offset + 1]]) as usize;
         offset += 2;
 
         // Client ID
         if offset + client_id_len > data.len() {
-            return Err(Error::InvalidWvdFile("Data too short for client ID".to_string()));
+            return Err(Error::InvalidWvdFile(
+                "Data too short for client ID".to_string(),
+            ));
         }
         let client_id_bytes = &data[offset..offset + client_id_len];
         offset += client_id_len;
 
         // VMP length (2 bytes, big endian) - v1 specific
         if offset + 2 > data.len() {
-            return Err(Error::InvalidWvdFile("Data too short for VMP length".to_string()));
+            return Err(Error::InvalidWvdFile(
+                "Data too short for VMP length".to_string(),
+            ));
         }
         let vmp_len = u16::from_be_bytes([data[offset], data[offset + 1]]) as usize;
         offset += 2;
 
         // VMP data - v1 specific
-        let mut client_id = ClientIdentification::decode(client_id_bytes)
-            .map_err(|e| Error::DecodeError(format!("Failed to parse ClientIdentification: {}", e)))?;
+        let mut client_id = ClientIdentification::decode(client_id_bytes).map_err(|e| {
+            Error::DecodeError(format!("Failed to parse ClientIdentification: {}", e))
+        })?;
 
         // If VMP data exists in v1, merge it into client_id
         if vmp_len > 0 && offset + vmp_len <= data.len() {
             let vmp_bytes = &data[offset..offset + vmp_len];
-            let has_vmp = client_id.vmp_data.as_ref().map_or(false, |d| !d.is_empty());
+            let has_vmp = client_id.vmp_data.as_ref().is_some_and(|d| !d.is_empty());
             if !has_vmp {
                 client_id.vmp_data = Some(vmp_bytes.to_vec());
             }

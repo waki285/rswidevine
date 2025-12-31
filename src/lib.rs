@@ -18,20 +18,20 @@
 #[macro_use]
 mod macros;
 
-/// Common error types and Result alias.
-pub mod error;
+/// Core CDM implementation.
+pub mod cdm;
 /// Widevine device (.wvd) parsing and serialization.
 pub mod device;
-/// CDM session container.
-pub mod session;
+/// Common error types and Result alias.
+pub mod error;
 /// Decrypted key representation.
 pub mod key;
 /// PSSH parsing and conversion utilities.
 pub mod pssh;
+/// CDM session container.
+pub mod session;
 /// Shared helper utilities.
 pub mod utils;
-/// Core CDM implementation.
-pub mod cdm;
 
 /// Remote CDM client (feature: `remote`).
 #[cfg(feature = "remote")]

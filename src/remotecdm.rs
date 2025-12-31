@@ -116,12 +116,21 @@ impl RemoteCdm {
             .map_err(|e| Error::Other(format!("Invalid response: {}", e)))?;
 
         if response.status != 200 {
-            return Err(Error::Other(format!("Cannot open session: {}", response.message)));
+            return Err(Error::Other(format!(
+                "Cannot open session: {}",
+                response.message
+            )));
         }
 
-        let data = response.data.ok_or_else(|| Error::Other("Missing response data".to_string()))?;
-        if data.device.system_id != self.system_id || data.device.security_level != self.security_level {
-            return Err(Error::DeviceMismatch("Device metadata mismatch".to_string()));
+        let data = response
+            .data
+            .ok_or_else(|| Error::Other("Missing response data".to_string()))?;
+        if data.device.system_id != self.system_id
+            || data.device.security_level != self.security_level
+        {
+            return Err(Error::DeviceMismatch(
+                "Device metadata mismatch".to_string(),
+            ));
         }
 
         let session_id = hex::decode(data.session_id)
@@ -158,10 +167,14 @@ impl RemoteCdm {
         session_id: &[u8],
         certificate: Option<&[u8]>,
     ) -> Result<String> {
-        let certificate_b64 = certificate.map(|c| base64::engine::general_purpose::STANDARD.encode(c));
+        let certificate_b64 =
+            certificate.map(|c| base64::engine::general_purpose::STANDARD.encode(c));
         let response: ApiResponse<ProviderResponse> = self
             .client
-            .post(format!("{}/{}/set_service_certificate", self.host, self.device_name))
+            .post(format!(
+                "{}/{}/set_service_certificate",
+                self.host, self.device_name
+            ))
             .header("X-Secret-Key", secret)
             .json(&serde_json::json!({
                 "session_id": hex::encode(session_id),
@@ -175,7 +188,9 @@ impl RemoteCdm {
         if response.status != 200 {
             return Err(Error::Other(response.message));
         }
-        let data = response.data.ok_or_else(|| Error::Other("Missing response data".to_string()))?;
+        let data = response
+            .data
+            .ok_or_else(|| Error::Other("Missing response data".to_string()))?;
         Ok(data.provider_id)
     }
 
@@ -187,7 +202,10 @@ impl RemoteCdm {
     ) -> Result<Option<SignedDrmCertificate>> {
         let response: ApiResponse<ServiceCertResponse> = self
             .client
-            .post(format!("{}/{}/get_service_certificate", self.host, self.device_name))
+            .post(format!(
+                "{}/{}/get_service_certificate",
+                self.host, self.device_name
+            ))
             .header("X-Secret-Key", secret)
             .json(&serde_json::json!({
                 "session_id": hex::encode(session_id),
@@ -201,13 +219,16 @@ impl RemoteCdm {
             return Err(Error::Other(response.message));
         }
 
-        let data = response.data.ok_or_else(|| Error::Other("Missing response data".to_string()))?;
+        let data = response
+            .data
+            .ok_or_else(|| Error::Other("Missing response data".to_string()))?;
         if let Some(cert_b64) = data.service_certificate {
             let cert_bytes = base64::engine::general_purpose::STANDARD
                 .decode(cert_b64)
                 .map_err(Error::Base64DecodeError)?;
-            let cert = SignedDrmCertificate::decode(cert_bytes.as_slice())
-                .map_err(|e| Error::DecodeError(format!("Failed to parse SignedDrmCertificate: {}", e)))?;
+            let cert = SignedDrmCertificate::decode(cert_bytes.as_slice()).map_err(|e| {
+                Error::DecodeError(format!("Failed to parse SignedDrmCertificate: {}", e))
+            })?;
             Ok(Some(cert))
         } else {
             Ok(None)
@@ -245,7 +266,9 @@ impl RemoteCdm {
         if response.status != 200 {
             return Err(Error::Other(response.message));
         }
-        let data = response.data.ok_or_else(|| Error::Other("Missing response data".to_string()))?;
+        let data = response
+            .data
+            .ok_or_else(|| Error::Other("Missing response data".to_string()))?;
         let bytes = base64::engine::general_purpose::STANDARD
             .decode(data.challenge_b64)
             .map_err(Error::Base64DecodeError)?;
@@ -304,7 +327,9 @@ impl RemoteCdm {
         if response.status != 200 {
             return Err(Error::Other(response.message));
         }
-        let data = response.data.ok_or_else(|| Error::Other("Missing response data".to_string()))?;
+        let data = response
+            .data
+            .ok_or_else(|| Error::Other("Missing response data".to_string()))?;
 
         let keys = data
             .keys

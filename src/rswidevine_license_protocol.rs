@@ -149,15 +149,12 @@ pub mod license {
         /// NOTE: Use of requested_protection is not recommended as it is only
         /// supported on a small number of platforms.
         #[prost(message, optional, tag = "7")]
-        pub requested_protection: ::core::option::Option<
-            key_container::OutputProtection,
-        >,
+        pub requested_protection: ::core::option::Option<key_container::OutputProtection>,
         #[prost(message, optional, tag = "8")]
         pub key_control: ::core::option::Option<key_container::KeyControl>,
         #[prost(message, optional, tag = "9")]
-        pub operator_session_key_permissions: ::core::option::Option<
-            key_container::OperatorSessionKeyPermissions,
-        >,
+        pub operator_session_key_permissions:
+            ::core::option::Option<key_container::OperatorSessionKeyPermissions>,
         /// Optional video resolution constraints. If the video resolution of the
         /// content being decrypted/decoded falls within one of the specified ranges,
         /// the optional required_protections may be applied. Otherwise an error will
@@ -165,9 +162,8 @@ pub mod license {
         /// NOTE: Use of this feature is not recommended, as it is only supported on
         /// a small number of platforms.
         #[prost(message, repeated, tag = "10")]
-        pub video_resolution_constraints: ::prost::alloc::vec::Vec<
-            key_container::VideoResolutionConstraint,
-        >,
+        pub video_resolution_constraints:
+            ::prost::alloc::vec::Vec<key_container::VideoResolutionConstraint>,
         /// Optional flag to indicate the key must only be used if the client
         /// supports anti rollback of the user table.  Content provider can query the
         /// client capabilities to determine if the client support this feature.
@@ -227,15 +223,7 @@ pub mod license {
             /// Indicates whether HDCP is required on digital outputs, and which
             /// version should be used.
             #[derive(
-                Clone,
-                Copy,
-                Debug,
-                PartialEq,
-                Eq,
-                Hash,
-                PartialOrd,
-                Ord,
-                ::prost::Enumeration
+                Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
             )]
             #[repr(i32)]
             pub enum Hdcp {
@@ -279,15 +267,7 @@ pub mod license {
             }
             /// Indicate the CGMS setting to be inserted on analog output.
             #[derive(
-                Clone,
-                Copy,
-                Debug,
-                PartialEq,
-                Eq,
-                Hash,
-                PartialOrd,
-                Ord,
-                ::prost::Enumeration
+                Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
             )]
             #[repr(i32)]
             pub enum Cgms {
@@ -321,15 +301,7 @@ pub mod license {
                 }
             }
             #[derive(
-                Clone,
-                Copy,
-                Debug,
-                PartialEq,
-                Eq,
-                Hash,
-                PartialOrd,
-                Ord,
-                ::prost::Enumeration
+                Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
             )]
             #[repr(i32)]
             pub enum HdcpSrmRule {
@@ -389,15 +361,7 @@ pub mod license {
             pub allow_signature_verify: ::core::option::Option<bool>,
         }
         #[derive(
-            Clone,
-            Copy,
-            Debug,
-            PartialEq,
-            Eq,
-            Hash,
-            PartialOrd,
-            Ord,
-            ::prost::Enumeration
+            Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
         )]
         #[repr(i32)]
         pub enum KeyType {
@@ -445,15 +409,7 @@ pub mod license {
         /// The SecurityLevel enumeration allows the server to communicate the level
         /// of robustness required by the client, in order to use the key.
         #[derive(
-            Clone,
-            Copy,
-            Debug,
-            PartialEq,
-            Eq,
-            Hash,
-            PartialOrd,
-            Ord,
-            ::prost::Enumeration
+            Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
         )]
         #[repr(i32)]
         pub enum SecurityLevel {
@@ -517,10 +473,13 @@ pub struct LicenseRequest {
     pub request_time: ::core::option::Option<i64>,
     /// Old-style decimal-encoded string key control nonce.
     #[prost(bytes = "vec", optional, tag = "5")]
-    pub key_control_nonce_deprecated: ::core::option::Option<
-        ::prost::alloc::vec::Vec<u8>,
-    >,
-    #[prost(enumeration = "ProtocolVersion", optional, tag = "6", default = "Version20")]
+    pub key_control_nonce_deprecated: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
+    #[prost(
+        enumeration = "ProtocolVersion",
+        optional,
+        tag = "6",
+        default = "Version20"
+    )]
     pub protocol_version: ::core::option::Option<i32>,
     /// New-style uint32 key control nonce, please use instead of
     /// key_control_nonce_deprecated.
@@ -534,10 +493,11 @@ pub struct LicenseRequest {
 pub mod license_request {
     #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct ContentIdentification {
-        #[prost(oneof = "content_identification::ContentIdVariant", tags = "1, 2, 3, 4")]
-        pub content_id_variant: ::core::option::Option<
-            content_identification::ContentIdVariant,
-        >,
+        #[prost(
+            oneof = "content_identification::ContentIdVariant",
+            tags = "1, 2, 3, 4"
+        )]
+        pub content_id_variant: ::core::option::Option<content_identification::ContentIdVariant>,
     }
     /// Nested message and enum types in `ContentIdentification`.
     pub mod content_identification {
@@ -570,9 +530,7 @@ pub mod license_request {
             #[prost(int64, optional, tag = "3")]
             pub seconds_since_last_played: ::core::option::Option<i64>,
             #[prost(bytes = "vec", optional, tag = "4")]
-            pub session_usage_table_entry: ::core::option::Option<
-                ::prost::alloc::vec::Vec<u8>,
-            >,
+            pub session_usage_table_entry: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
         }
         #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
         pub struct InitData {
@@ -593,15 +551,7 @@ pub mod license_request {
         /// Nested message and enum types in `InitData`.
         pub mod init_data {
             #[derive(
-                Clone,
-                Copy,
-                Debug,
-                PartialEq,
-                Eq,
-                Hash,
-                PartialOrd,
-                Ord,
-                ::prost::Enumeration
+                Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
             )]
             #[repr(i32)]
             pub enum InitDataType {
@@ -642,17 +592,7 @@ pub mod license_request {
             InitData(InitData),
         }
     }
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum RequestType {
         New = 1,
@@ -702,17 +642,7 @@ pub mod metric_data {
         #[prost(int64, optional, tag = "2", default = "0")]
         pub value: ::core::option::Option<i64>,
     }
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum MetricType {
         /// The time spent in the 'stage', specified in microseconds.
@@ -800,17 +730,7 @@ pub struct SignedMessage {
 }
 /// Nested message and enum types in `SignedMessage`.
 pub mod signed_message {
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum MessageType {
         LicenseRequest = 1,
@@ -860,17 +780,7 @@ pub mod signed_message {
             }
         }
     }
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum SessionKeyType {
         Undefined = 0,
@@ -926,17 +836,13 @@ pub struct ClientIdentification {
     pub license_counter: ::core::option::Option<u32>,
     /// List of non-baseline client capabilities.
     #[prost(message, optional, tag = "6")]
-    pub client_capabilities: ::core::option::Option<
-        client_identification::ClientCapabilities,
-    >,
+    pub client_capabilities: ::core::option::Option<client_identification::ClientCapabilities>,
     /// Serialized VmpData message. Optional.
     #[prost(bytes = "vec", optional, tag = "7")]
     pub vmp_data: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
     /// Optional field that may contain additional provisioning credentials.
     #[prost(message, repeated, tag = "8")]
-    pub device_credentials: ::prost::alloc::vec::Vec<
-        client_identification::ClientCredentials,
-    >,
+    pub device_credentials: ::prost::alloc::vec::Vec<client_identification::ClientCredentials>,
 }
 /// Nested message and enum types in `ClientIdentification`.
 pub mod client_identification {
@@ -1007,15 +913,7 @@ pub mod client_identification {
     /// Nested message and enum types in `ClientCapabilities`.
     pub mod client_capabilities {
         #[derive(
-            Clone,
-            Copy,
-            Debug,
-            PartialEq,
-            Eq,
-            Hash,
-            PartialOrd,
-            Ord,
-            ::prost::Enumeration
+            Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
         )]
         #[repr(i32)]
         pub enum HdcpVersion {
@@ -1058,15 +956,7 @@ pub mod client_identification {
             }
         }
         #[derive(
-            Clone,
-            Copy,
-            Debug,
-            PartialEq,
-            Eq,
-            Hash,
-            PartialOrd,
-            Ord,
-            ::prost::Enumeration
+            Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
         )]
         #[repr(i32)]
         pub enum CertificateKeyType {
@@ -1103,15 +993,7 @@ pub mod client_identification {
             }
         }
         #[derive(
-            Clone,
-            Copy,
-            Debug,
-            PartialEq,
-            Eq,
-            Hash,
-            PartialOrd,
-            Ord,
-            ::prost::Enumeration
+            Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration,
         )]
         #[repr(i32)]
         pub enum AnalogOutputCapabilities {
@@ -1139,9 +1021,7 @@ pub mod client_identification {
                     "ANALOG_OUTPUT_UNKNOWN" => Some(Self::AnalogOutputUnknown),
                     "ANALOG_OUTPUT_NONE" => Some(Self::AnalogOutputNone),
                     "ANALOG_OUTPUT_SUPPORTED" => Some(Self::AnalogOutputSupported),
-                    "ANALOG_OUTPUT_SUPPORTS_CGMS_A" => {
-                        Some(Self::AnalogOutputSupportsCgmsA)
-                    }
+                    "ANALOG_OUTPUT_SUPPORTS_CGMS_A" => Some(Self::AnalogOutputSupportsCgmsA),
                     _ => None,
                 }
             }
@@ -1154,17 +1034,7 @@ pub mod client_identification {
         #[prost(bytes = "vec", optional, tag = "2")]
         pub token: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
     }
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum TokenType {
         Keybox = 0,
@@ -1190,9 +1060,7 @@ pub mod client_identification {
             match value {
                 "KEYBOX" => Some(Self::Keybox),
                 "DRM_DEVICE_CERTIFICATE" => Some(Self::DrmDeviceCertificate),
-                "REMOTE_ATTESTATION_CERTIFICATE" => {
-                    Some(Self::RemoteAttestationCertificate)
-                }
+                "REMOTE_ATTESTATION_CERTIFICATE" => Some(Self::RemoteAttestationCertificate),
                 "OEM_DEVICE_CERTIFICATE" => Some(Self::OemDeviceCertificate),
                 _ => None,
             }
@@ -1210,9 +1078,7 @@ pub struct EncryptedClientIdentification {
     /// Serial number for the service certificate for which ClientIdentification is
     /// encrypted.
     #[prost(bytes = "vec", optional, tag = "2")]
-    pub service_certificate_serial_number: ::core::option::Option<
-        ::prost::alloc::vec::Vec<u8>,
-    >,
+    pub service_certificate_serial_number: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
     /// Serialized ClientIdentification message, encrypted with the privacy key
     /// using AES-128-CBC with PKCS#5 padding.
     #[prost(bytes = "vec", optional, tag = "3")]
@@ -1310,17 +1176,7 @@ pub mod drm_certificate {
         #[prost(enumeration = "Algorithm", optional, tag = "2", default = "Rsa")]
         pub algorithm: ::core::option::Option<i32>,
     }
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum Type {
         /// ProtoBestPractices: ignore.
@@ -1356,17 +1212,7 @@ pub mod drm_certificate {
             }
         }
     }
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum ServiceType {
         UnknownServiceType = 0,
@@ -1401,17 +1247,7 @@ pub mod drm_certificate {
             }
         }
     }
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum Algorithm {
         UnknownAlgorithm = 0,
@@ -1571,17 +1407,7 @@ pub mod widevine_pssh_data {
         #[prost(uint32, optional, tag = "5", default = "32")]
         pub entitlement_key_size_bytes: ::core::option::Option<u32>,
     }
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum Type {
         /// Single PSSH to be used to retrieve content keys.
@@ -1614,17 +1440,7 @@ pub mod widevine_pssh_data {
         }
     }
     /// //////////////////////////  Deprecated Fields  ////////////////////////////
-    #[derive(
-        Clone,
-        Copy,
-        Debug,
-        PartialEq,
-        Eq,
-        Hash,
-        PartialOrd,
-        Ord,
-        ::prost::Enumeration
-    )]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
     #[repr(i32)]
     pub enum Algorithm {
         Unencrypted = 0,

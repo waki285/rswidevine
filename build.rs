@@ -4,11 +4,11 @@ use std::path::PathBuf;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     /*Codegen::new()
-        .out_dir("src")
-        .inputs(&["src/license_protocol.proto"])
-        .include("src")
-        .run()
-        .expect("failed to codegen")*/
+    .out_dir("src")
+    .inputs(&["src/license_protocol.proto"])
+    .include("src")
+    .run()
+    .expect("failed to codegen")*/
     /*protobuf_codegen::Codegen::new()
     // Use `protoc` parser, optional.
         .protoc()

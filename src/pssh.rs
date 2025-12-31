@@ -4,9 +4,9 @@
 use std::str::FromStr;
 
 use base64::Engine;
-use byteorder::{BigEndian, ByteOrder};
 #[cfg(feature = "playready")]
 use byteorder::LittleEndian;
+use byteorder::{BigEndian, ByteOrder};
 use prost::Message;
 use uuid::Uuid;
 
@@ -83,13 +83,13 @@ impl Pssh {
         }
 
         if contains_playready_header(data) {
-            return Ok(Pssh::new(
+            return Pssh::new(
                 SystemId::PlayReady.to_uuid(),
                 None,
                 Some(data.to_vec()),
                 0,
                 0,
-            )?);
+            );
         }
 
         if strict {
@@ -98,7 +98,13 @@ impl Pssh {
             ));
         }
 
-        Pssh::new(SystemId::Widevine.to_uuid(), None, Some(data.to_vec()), 0, 0)
+        Pssh::new(
+            SystemId::Widevine.to_uuid(),
+            None,
+            Some(data.to_vec()),
+            0,
+            0,
+        )
     }
 
     /// Parse a PSSH box or init data from base64.
@@ -171,8 +177,9 @@ impl Pssh {
         }
 
         if self.system_id == SystemId::Widevine.to_uuid() {
-            let pssh_data = WidevinePsshData::decode(self.init_data.as_slice())
-                .map_err(|e| Error::DecodeError(format!("Failed to parse WidevinePsshData: {}", e)))?;
+            let pssh_data = WidevinePsshData::decode(self.init_data.as_slice()).map_err(|e| {
+                Error::DecodeError(format!("Failed to parse WidevinePsshData: {}", e))
+            })?;
 
             let mut ids = Vec::new();
             for key_id in pssh_data.key_ids.iter() {
@@ -350,7 +357,9 @@ fn parse_pssh_box(data: &[u8]) -> Result<Pssh> {
     }
 
     if actual_size > data.len() {
-        return Err(Error::InvalidInitData("PSSH size exceeds data length".to_string()));
+        return Err(Error::InvalidInitData(
+            "PSSH size exceeds data length".to_string(),
+        ));
     }
 
     if data.len() < offset + 4 + 16 {
@@ -388,7 +397,9 @@ fn parse_pssh_box(data: &[u8]) -> Result<Pssh> {
     }
 
     if data.len() < offset + 4 {
-        return Err(Error::InvalidInitData("Missing init data length".to_string()));
+        return Err(Error::InvalidInitData(
+            "Missing init data length".to_string(),
+        ));
     }
     let data_size = BigEndian::read_u32(&data[offset..offset + 4]) as usize;
     offset += 4;
@@ -439,20 +450,19 @@ fn parse_widevine_pssh_data(data: &[u8]) -> Result<Pssh> {
         .map_err(|e| Error::DecodeError(format!("Failed to parse WidevinePsshData: {}", e)))?;
     let encoded = pssh_data.encode_to_vec();
     if encoded != data {
-        return Err(Error::InvalidInitData("Partial WidevinePsshData parse".to_string()));
+        return Err(Error::InvalidInitData(
+            "Partial WidevinePsshData parse".to_string(),
+        ));
     }
 
-    Pssh::new(
-        SystemId::Widevine.to_uuid(),
-        None,
-        Some(encoded),
-        0,
-        0,
-    )
+    Pssh::new(SystemId::Widevine.to_uuid(), None, Some(encoded), 0, 0)
 }
 
 fn contains_playready_header(data: &[u8]) -> bool {
-    let marker = "</WRMHEADER>".encode_utf16().flat_map(|u| u.to_le_bytes()).collect::<Vec<u8>>();
+    let marker = "</WRMHEADER>"
+        .encode_utf16()
+        .flat_map(|u| u.to_le_bytes())
+        .collect::<Vec<u8>>();
     data.windows(marker.len()).any(|window| window == marker)
 }
 
@@ -481,7 +491,9 @@ fn parse_key_id_bytes(key_id: &[u8]) -> Uuid {
 #[cfg(feature = "playready")]
 fn parse_playready_key_ids(data: &[u8]) -> Result<Vec<Uuid>> {
     if data.len() < 6 {
-        return Err(Error::InvalidInitData("PlayReady data too short".to_string()));
+        return Err(Error::InvalidInitData(
+            "PlayReady data too short".to_string(),
+        ));
     }
 
     let total_length = LittleEndian::read_u32(&data[0..4]) as usize;
@@ -496,14 +508,18 @@ fn parse_playready_key_ids(data: &[u8]) -> Result<Vec<Uuid>> {
 
     for _ in 0..record_count {
         if data.len() < offset + 4 {
-            return Err(Error::InvalidInitData("PlayReady record truncated".to_string()));
+            return Err(Error::InvalidInitData(
+                "PlayReady record truncated".to_string(),
+            ));
         }
         let record_type = LittleEndian::read_u16(&data[offset..offset + 2]);
         let record_length = LittleEndian::read_u16(&data[offset + 2..offset + 4]) as usize;
         offset += 4;
 
         if data.len() < offset + record_length {
-            return Err(Error::InvalidInitData("PlayReady record truncated".to_string()));
+            return Err(Error::InvalidInitData(
+                "PlayReady record truncated".to_string(),
+            ));
         }
         let record_data = &data[offset..offset + record_length];
         offset += record_length;
@@ -602,8 +618,14 @@ mod tests {
     #[test]
     fn pssh_roundtrip_bytes_v0() {
         let init_data = b"example-init-data".to_vec();
-        let pssh = Pssh::new(SystemId::Widevine.to_uuid(), None, Some(init_data.clone()), 0, 0)
-            .expect("create pssh");
+        let pssh = Pssh::new(
+            SystemId::Widevine.to_uuid(),
+            None,
+            Some(init_data.clone()),
+            0,
+            0,
+        )
+        .expect("create pssh");
 
         let bytes = pssh.to_bytes();
         let parsed = Pssh::from_bytes(&bytes).expect("parse pssh");

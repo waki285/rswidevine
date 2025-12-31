@@ -73,9 +73,18 @@ pub async fn run(config: ServeConfig, host: &str, port: u16) -> Result<()> {
         .route("/", get(ping))
         .route("/:device/open", get(open))
         .route("/:device/close/:session_id", get(close))
-        .route("/:device/set_service_certificate", post(set_service_certificate))
-        .route("/:device/get_service_certificate", post(get_service_certificate))
-        .route("/:device/get_license_challenge/:license_type", post(get_license_challenge))
+        .route(
+            "/:device/set_service_certificate",
+            post(set_service_certificate),
+        )
+        .route(
+            "/:device/get_service_certificate",
+            post(get_service_certificate),
+        )
+        .route(
+            "/:device/get_license_challenge/:license_type",
+            post(get_license_challenge),
+        )
         .route("/:device/parse_license", post(parse_license))
         .route("/:device/get_keys/:key_type", post(get_keys))
         .with_state(state);
@@ -475,7 +484,12 @@ async fn get_license_challenge(
     };
 
     if state.config.force_privacy_mode {
-        if cdm.get_service_certificate(&session_id).ok().flatten().is_none() {
+        if cdm
+            .get_service_certificate(&session_id)
+            .ok()
+            .flatten()
+            .is_none()
+        {
             return json_response(
                 StatusCode::FORBIDDEN,
                 Json(json!({
@@ -499,7 +513,8 @@ async fn get_license_challenge(
         }
     };
 
-    let challenge = match cdm.get_license_challenge(&session_id, &pssh, &license_type, privacy_mode) {
+    let challenge = match cdm.get_license_challenge(&session_id, &pssh, &license_type, privacy_mode)
+    {
         Ok(challenge) => challenge,
         Err(e) => {
             return json_response(
@@ -564,18 +579,19 @@ async fn parse_license(
         }
     };
 
-    let license_message = match base64::engine::general_purpose::STANDARD.decode(&body.license_message) {
-        Ok(bytes) => bytes,
-        Err(_) => {
-            return json_response(
-                StatusCode::BAD_REQUEST,
-                Json(json!({
-                    "status": 400,
-                    "message": "Invalid license message"
-                })),
-            )
-        }
-    };
+    let license_message =
+        match base64::engine::general_purpose::STANDARD.decode(&body.license_message) {
+            Ok(bytes) => bytes,
+            Err(_) => {
+                return json_response(
+                    StatusCode::BAD_REQUEST,
+                    Json(json!({
+                        "status": 400,
+                        "message": "Invalid license message"
+                    })),
+                )
+            }
+        };
 
     let mut cdms = state.cdms.lock().await;
     let cdm = match cdms.get_mut(&(secret, device.clone())) {
@@ -658,7 +674,11 @@ async fn get_keys(
         }
     };
 
-    let key_type = if key_type == "ALL" { None } else { Some(key_type.as_str()) };
+    let key_type = if key_type == "ALL" {
+        None
+    } else {
+        Some(key_type.as_str())
+    };
     let keys = match cdm.get_keys(&session_id, key_type) {
         Ok(keys) => keys,
         Err(e) => {
@@ -696,7 +716,11 @@ async fn get_keys(
     )
 }
 
-fn authorize(state: &ServeState, device: &str, headers: &HeaderMap) -> std::result::Result<String, Response> {
+fn authorize(
+    state: &ServeState,
+    device: &str,
+    headers: &HeaderMap,
+) -> std::result::Result<String, Response> {
     let secret = headers.get("X-Secret-Key").and_then(|v| v.to_str().ok());
     if secret.is_none() {
         return Err(json_response(
@@ -753,7 +777,10 @@ fn build_device_map(devices: &[String]) -> Result<HashMap<String, PathBuf>> {
     for device in devices {
         let path = PathBuf::from(device);
         if !path.is_file() {
-            return Err(Error::Other(format!("Device file does not exist: {}", device)));
+            return Err(Error::Other(format!(
+                "Device file does not exist: {}",
+                device
+            )));
         }
         let name = path
             .file_stem()
