@@ -9,6 +9,7 @@ use std::io::Write;
 use std::path::Path;
 
 use prost::Message;
+use rsa::pkcs1::DecodeRsaPrivateKey;
 use rsa::pkcs8::DecodePrivateKey;
 use rsa::RsaPrivateKey;
 
@@ -200,6 +201,7 @@ impl Device {
         offset += private_key_len;
 
         let private_key = RsaPrivateKey::from_pkcs8_der(private_key_der)
+            .or_else(|_| RsaPrivateKey::from_pkcs1_der(private_key_der))
             .map_err(|e| Error::InvalidWvdFile(format!("Failed to parse RSA key: {}", e)))?;
 
         // Client ID length (2 bytes, big endian)
@@ -264,6 +266,7 @@ impl Device {
         offset += private_key_len;
 
         let private_key = RsaPrivateKey::from_pkcs8_der(private_key_der)
+            .or_else(|_| RsaPrivateKey::from_pkcs1_der(private_key_der))
             .map_err(|e| Error::InvalidWvdFile(format!("Failed to parse RSA key: {}", e)))?;
 
         // Client ID length (2 bytes, big endian)
