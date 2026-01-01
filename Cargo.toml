@@ -10,7 +10,7 @@ keywords = ["widevine", "drm", "cdm", "cenc"]
 categories = ["multimedia::video", "cryptography"]
 
 rust-version = "1.87.0"
-include = ["src/**", "Cargo.toml", "Cargo.lock", "build.rs", "LICENSE", "README.md"]
+include = ["src/**", "Cargo.toml", "Cargo.lock", "build.rs", "LICENSE", "README.md", "examples/**"]
 
 [dependencies]
 anyhow = "1"
