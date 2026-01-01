@@ -9,6 +9,9 @@ homepage = "https://github.com/waki285/rswidevine"
 keywords = ["widevine", "drm", "cdm", "cenc"]
 categories = ["multimedia::video", "cryptography"]
 
+rust-version = "1.87.0"
+include = ["src/**", "Cargo.toml", "Cargo.lock", "build.rs", "LICENSE", "README.md"]
+
 [dependencies]
 anyhow = "1"
 thiserror = "2"
