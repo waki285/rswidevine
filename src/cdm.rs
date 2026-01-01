@@ -125,7 +125,7 @@ static ROOT_PUBLIC_KEY: LazyLock<RsaPublicKey> = LazyLock::new(|| {
 });
 
 /// Widevine Content Decryption Module (CDM).
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Cdm {
     pub device_type: DeviceType,
     pub system_id: u32,
@@ -649,6 +649,7 @@ impl Cdm {
     /// Derive encryption and MAC context from a message.
     ///
     /// Context format follows Widevine's ENCRYPTION/AUTHENTICATION labels.
+    #[must_use]
     pub fn derive_context(message: &[u8]) -> (Vec<u8>, Vec<u8>) {
         fn enc_context(msg: &[u8]) -> Vec<u8> {
             let mut out = Vec::with_capacity(11 + msg.len() + 4);
@@ -675,6 +676,7 @@ impl Cdm {
     ///
     /// Returns (enc_key, mac_key_server, mac_key_client) using AES-CMAC over
     /// the context data.
+    #[must_use]
     pub fn derive_keys(
         enc_context: &[u8],
         mac_context: &[u8],
@@ -705,6 +707,7 @@ fn sign_pss_sha1(private_key: &RsaPrivateKey, message: &[u8]) -> Result<Vec<u8>>
     Ok(signature)
 }
 
+#[must_use]
 fn random_u32() -> u32 {
     let mut rng = OsRng;
     let mut buf = [0u8; 4];

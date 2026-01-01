@@ -28,6 +28,7 @@ pub struct Key {
 
 impl Key {
     /// Create a new Key.
+    #[must_use]
     pub fn new(key_type: String, kid: Uuid, key: Vec<u8>, permissions: Vec<String>) -> Self {
         Self {
             key_type,

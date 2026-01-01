@@ -25,7 +25,7 @@ const WVD_MAGIC: &[u8; 3] = b"WVD";
 const WVD_VERSION: u8 = 2;
 
 /// Device types supported by Widevine.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum DeviceType {
     /// Chrome CDM device.
@@ -60,7 +60,7 @@ impl From<DeviceType> for u8 {
 /// This struct is the Rust equivalent of pywidevine's `Device` and is the
 /// primary source of CDM credentials. The system id is extracted from the DRM
 /// certificate embedded in the ClientIdentification token.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Device {
     /// Device type (Chrome or Android).
     pub device_type: DeviceType,

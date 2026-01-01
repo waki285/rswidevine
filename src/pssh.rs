@@ -14,14 +14,15 @@ use crate::error::{Error, Result};
 use crate::license_protocol::WidevinePsshData;
 
 /// Known DRM system IDs.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum SystemId {
     Widevine,
     PlayReady,
 }
 
 impl SystemId {
-    pub fn to_uuid(self) -> Uuid {
+    #[must_use]
+    pub const fn to_uuid(self) -> Uuid {
         match self {
             SystemId::Widevine => Uuid::from_u128(0xedef8ba979d64acea3c827dcd51d21ed),
             SystemId::PlayReady => Uuid::from_u128(0x9a04f07998404286ab92e65be0885f95),
@@ -156,11 +157,13 @@ impl Pssh {
     }
 
     /// Serialize as a full PSSH box.
+    #[must_use]
     pub fn to_bytes(&self) -> Vec<u8> {
         build_pssh_box(self)
     }
 
     /// Serialize as a base64 PSSH box.
+    #[must_use]
     pub fn to_base64(&self) -> String {
         base64::engine::general_purpose::STANDARD.encode(self.to_bytes())
     }
@@ -288,20 +291,6 @@ impl Pssh {
         Ok(())
     }
 
-    #[cfg(not(feature = "playready"))]
-    pub fn to_playready(
-        &mut self,
-        _la_url: Option<&str>,
-        _lui_url: Option<&str>,
-        _ds_id: Option<&[u8]>,
-        _decryptor_setup: Option<&str>,
-        _custom_data: Option<&str>,
-    ) -> Result<()> {
-        Err(Error::InvalidInitData(
-            "playready feature is disabled".to_string(),
-        ))
-    }
-
     /// Replace KIDs in the init data and box (Widevine only).
     pub fn set_key_ids(&mut self, key_ids: &[Uuid]) -> Result<()> {
         if self.system_id != SystemId::Widevine.to_uuid() {
@@ -417,6 +406,7 @@ fn parse_pssh_box(data: &[u8]) -> Result<Pssh> {
     })
 }
 
+#[must_use]
 fn build_pssh_box(pssh: &Pssh) -> Vec<u8> {
     let mut body = Vec::new();
     body.push(pssh.version);
@@ -458,6 +448,7 @@ fn parse_widevine_pssh_data(data: &[u8]) -> Result<Pssh> {
     Pssh::new(SystemId::Widevine.to_uuid(), None, Some(encoded), 0, 0)
 }
 
+#[must_use]
 fn contains_playready_header(data: &[u8]) -> bool {
     let marker = "</WRMHEADER>"
         .encode_utf16()
@@ -466,6 +457,7 @@ fn contains_playready_header(data: &[u8]) -> bool {
     data.windows(marker.len()).any(|window| window == marker)
 }
 
+#[must_use]
 fn parse_key_id_bytes(key_id: &[u8]) -> Uuid {
     if key_id.len() == 16 {
         return Uuid::from_slice(key_id).unwrap_or_else(|_| Uuid::nil());
@@ -489,6 +481,7 @@ fn parse_key_id_bytes(key_id: &[u8]) -> Uuid {
 }
 
 #[cfg(feature = "playready")]
+#[must_use]
 fn parse_playready_key_ids(data: &[u8]) -> Result<Vec<Uuid>> {
     if data.len() < 6 {
         return Err(Error::InvalidInitData(

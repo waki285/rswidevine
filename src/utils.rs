@@ -3,6 +3,7 @@ use std::env;
 use std::path::{Path, PathBuf};
 
 /// Search PATH for the first matching binary name.
+#[must_use]
 pub fn get_binary_path(names: &[&str]) -> Option<PathBuf> {
     let path_var = env::var_os("PATH")?;
     let paths = env::split_paths(&path_var);

@@ -50,7 +50,7 @@ pub struct ServeUser {
     pub devices: Vec<String>,
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct ServeState {
     config: ServeConfig,
     devices: HashMap<String, PathBuf>,

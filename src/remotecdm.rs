@@ -12,7 +12,7 @@ use crate::license_protocol::SignedDrmCertificate;
 use crate::pssh::Pssh;
 
 /// Remote-accessible CDM wrapper.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RemoteCdm {
     /// Device type the remote server should match.
     pub device_type: DeviceType,
@@ -30,6 +30,7 @@ impl RemoteCdm {
     ///
     /// The server must advertise a `pywidevine serve vX.Y.Z` header and the
     /// version must be >= 1.4.3.
+    #[must_use]
     pub fn new(
         device_type: DeviceType,
         system_id: u32,
@@ -98,6 +99,7 @@ impl RemoteCdm {
     }
 
     /// Remote CDM cannot be created from a local device.
+    #[must_use]
     pub fn from_device(_device: Device) -> Result<Self> {
         Err(Error::Other(
             "RemoteCdm cannot be created from a local Device".to_string(),
@@ -302,6 +304,7 @@ impl RemoteCdm {
     }
 
     /// Fetch decrypted keys from the remote server.
+    #[must_use]
     pub fn get_keys(
         &self,
         secret: &str,
@@ -347,46 +350,46 @@ impl RemoteCdm {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct ApiResponse<T> {
     status: i32,
     message: String,
     data: Option<T>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct OpenResponse {
     session_id: String,
     device: DeviceInfo,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct DeviceInfo {
     system_id: u32,
     security_level: u8,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct ProviderResponse {
     provider_id: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct ServiceCertResponse {
     service_certificate: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct ChallengeResponse {
     challenge_b64: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct KeysResponse {
     keys: Vec<KeyResponse>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 struct KeyResponse {
     key_id: String,
     key: String,
@@ -394,12 +397,14 @@ struct KeyResponse {
     permissions: Vec<String>,
 }
 
+#[must_use]
 fn extract_version(server: &str, marker: &str) -> Option<String> {
     server
         .find(marker)
         .map(|idx| server[idx + marker.len()..].trim().to_string())
 }
 
+#[must_use]
 fn version_at_least(version: &str, minimum: &str) -> bool {
     let parse = |v: &str| {
         v.split('.')

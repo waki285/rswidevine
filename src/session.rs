@@ -13,7 +13,7 @@ use crate::license_protocol::SignedDrmCertificate;
 ///
 /// Session ids are randomly generated 16-byte values. The `context` map
 /// associates request_id to the derived encryption and MAC contexts.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Session {
     /// Session number (1-indexed).
     pub number: u32,
@@ -29,6 +29,7 @@ pub struct Session {
 
 impl Session {
     /// Create a new session with the given session number.
+    #[must_use]
     pub fn new(number: u32) -> Self {
         let mut id = vec![0u8; 16];
         let mut rng = OsRng;
