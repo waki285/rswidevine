@@ -74,11 +74,6 @@ and basic CDM checks. See `--help` for full usage.
 | `serve`     | HTTP serve API. |
 | `full`      | Enables `cli`, `chrono`, `playready`, `remote`, `serve`, `tracing`. |
 
-## Development Notes
-
-- Protobuf definitions live in `src/license_protocol.proto` and generated code is checked in.
-- Generated code is wrapped to avoid `rustfmt` rewriting it on stable.
-
 ## License
 
 GPL-3.0-only. See `LICENSE`.
